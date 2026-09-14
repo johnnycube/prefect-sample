@@ -1,0 +1,27 @@
+[project]
+name = "prefect-sample"
+version = "0.1.0"
+description = "Sample Prefect 3 flow repository for testing a self-hosted Prefect server with a Kubernetes work pool."
+requires-python = ">=3.12"
+# Pinned to the Prefect version running in the cluster's flow-run image
+# (prefecthq/prefect:3.8.6-python3.12); keep both in lockstep.
+dependencies = [
+  "prefect==3.8.6",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

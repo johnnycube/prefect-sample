@@ -1,0 +1,43 @@
+# Prefect project file — `prefect deploy --all` registers every deployment
+# below on the server the CLI is pointed at (PREFECT_API_URL).
+name: prefect-sample
+prefect-version: 3.8.6
+
+# How a flow-run pod obtains the code. Nothing is uploaded at deploy time:
+# the worker clones this repository at the start of every run, so the
+# server only stores the entrypoint and the pull steps.
+pull:
+  - prefect.deployments.steps.git_clone:
+      id: clone
+      repository: https://github.com/johnnycube/prefect-sample.git
+      branch: main
+  # Runtime dependencies beyond what the flow-run image ships; installs
+  # into the user site because the pod has a read-only root filesystem.
+  - prefect.deployments.steps.pip_install_requirements:
+      directory: "{{ clone.directory }}"
+      requirements_file: requirements.txt
+
+deployments:
+  - name: url-check-hourly
+    description: Probe a few public URLs every hour; the run fails when any is down.
+    entrypoint: flows/url_check.py:url_check
+    work_pool:
+      name: kubernetes
+      # Per-deployment overrides of the pool's base job template. The
+      # image, namespace, service account and security context stay with
+      # the pool (declared in the homelab repo); only sizing is set here.
+      job_variables:
+        cpu_request: 100m
+        memory_request: 128Mi
+        memory_limit: 512Mi
+    parameters:
+      timeout: 10
+      fail_on_error: true
+    schedules:
+      - cron: "0 * * * *"
+        timezone: Europe/Berlin
+        active: true
+    tags:
+      - sample
+      - monitoring
+    concurrency_limit: 1
