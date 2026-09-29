@@ -6,7 +6,7 @@ requires-python = ">=3.12"
 # Pinned to the Prefect version running in the cluster's flow-run image
 # (prefecthq/prefect:3.8.6-python3.12); keep both in lockstep.
 dependencies = [
-  "prefect==3.8.6",
+  "prefect==3.8.7",
 ]
 
 [dependency-groups]
